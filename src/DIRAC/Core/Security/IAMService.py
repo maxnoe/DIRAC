@@ -1,10 +1,15 @@
 """ IAMService class encapsulates connection to the IAM service for a given VO
 """
 
+import re
 import requests
 
 from DIRAC import S_OK, gConfig, gLogger
 from DIRAC.ConfigurationSystem.Client.Helpers.CSGlobals import getVO
+
+
+# re to split at commas, but not escaped commas \,
+_split_dn_re = re.compile(r"(?<!\\),")
 
 
 def convert_dn(inStr):
@@ -12,7 +17,8 @@ def convert_dn(inStr):
     CN=Christophe Haen,CN=705305,CN=chaen,OU=Users,OU=Organic Units,DC=cern,DC=ch
     /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=chaen/CN=705305/CN=Christophe Haen
     """
-    return "/" + "/".join(inStr.split(",")[::-1])
+    parts = _split_dn_re.split(inStr)
+    return "/" + "/".join(p.replace(r"\,", ",") for p in parts[::-1])
 
 
 class IAMService:

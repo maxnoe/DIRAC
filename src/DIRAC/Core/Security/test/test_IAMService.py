@@ -8,6 +8,19 @@ groups_by_name = {g["displayName"]: g for g in iam_data["groups"]}
 
 
 @pytest.mark.parametrize(
+    ("rfc_dn", "legacy_dn"),
+    [
+        ("CN=Albert Einstein,OU=patentamt bern,C=ch", "/C=ch/OU=patentamt bern/CN=Albert Einstein"),
+        (r"CN=foo\,bar,OU=CERN,C=ch", "/C=ch/OU=CERN/CN=foo,bar"),
+    ],
+)
+def test_convert_dn(rfc_dn, legacy_dn):
+    from DIRAC.Core.Security.IAMService import convert_dn
+
+    assert convert_dn(rfc_dn) == legacy_dn
+
+
+@pytest.mark.parametrize(
     ("group_name", "role_name"),
     [
         ("ctao.dpps.test/user", "/ctao.dpps.test/Role=user"),
